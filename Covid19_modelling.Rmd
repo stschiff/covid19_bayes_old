@@ -1,0 +1,50 @@
+---
+title: "Covid19 Bayesian modeling"
+author: "Stephan Schiffels"
+date: "April 2020"
+output:
+  pdf_document:
+    citation_package: biblatex
+bibliography: bibliography.bib
+biblio-style: numeric
+---
+
+```{r include=FALSE}
+library(magrittr)
+library(ggplot2)
+```
+
+
+# Introduction
+
+The Covid-19 pandemic provides an excellent starting point for a case study on bayesian modelling. One the one hand there are clear --unobserved-- epidemiological questions one is interested in, such as the basic reproduction rate $R_0$ or number of infected people at any time point. On the other hand, there is --observed-- data, such as confirmed cases after testing, and confirmed deaths, which are publicly available for many countries in the world. These observed and the unobserved worlds are obviously connected, but this connection is challenged by issues such as time lags introduced through testing, disease progression dynamics, and incomplete data.
+
+Several professional reports have been published, including Bayesian analyses (see [@Hamouda2020-iy; @Flaxman2020-qy]), and I will pick up some ideas from them, and introduce some new ideas myself. I also draw extensively from a previous blog post that I co-authored [@BlogLink].
+
+# Data
+
+The basic data used here are the confirmed daily test cases and deaths from Germany, conveniently queried through our [Covid19germany R package](https://github.com/nevrome/covid19germany):
+
+```{r eval=FALSE}
+dat <- covid19germany::get_RKI_timeseries() %>%
+  covid19germany::group_RKI_timeseries() %>%
+  dplyr::select(Date, NumberNewTestedIll, NumberNewDead) %>%
+  dplyr::filter(Date < as.POSIXct("2020-04-18"))
+```
+
+```{r include=FALSE}
+load("rki_dat_Apr17.RData")
+```
+
+Here is a plot of those daily cases:
+
+```{r echo=FALSE, fig.height = 3, fig.width = 3, fig.align = "center"}
+ggplot(dat) +
+  geom_bar(mapping = aes(x = Date, y = NumberNewTestedIll), stat = "identity") +
+  theme(axis.text=element_text(size=8),
+        axis.title=element_text(size=11))
+```
+
+
+
+# References
